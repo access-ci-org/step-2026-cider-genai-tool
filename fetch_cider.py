@@ -2,7 +2,7 @@ import requests
 from typing import Optional
 import json
 import trafilatura
-from trafilatura.spider import focused_crawler
+from crawler import get_all_document_links
 import time
 
 BASE_URL = "https://operations-api.access-ci.org"
@@ -75,24 +75,20 @@ def scrape_content(url, output_format: str = "markdown"):
     return None
 
 
-def crawl_and_scrape(seed_url, max_pages: int = 10):
+def crawl_and_scrape(info_resource_id, seed_url, max_pages: int = 10):
     """
-    Crawls the domain starting from seed_url, gather links, and scrapes their content.
+    Gather links given URL, and scrapes their content.
     """
 
-    VISITED_LOG_FILE = "visited_urls.txt"
-    OUTPUT_DATA_FILE = "scraped_content.txt"
+    VISITED_LOG_FILE = f"{info_resource_id.split('.')[0]}_visited_urls.txt"
+    OUTPUT_DATA_FILE = f"{info_resource_id.split('.')[0]}_scraped_content.md"
 
-    print(f"Crawling webpages, starting from {seed_url}")
+    to_visit_urls = get_all_document_links(seed_url, max_pages=max_pages)
 
-    to_visit, known_links = focused_crawler(
-        seed_url, max_seen_urls=max_pages)
-    to_visit = set(to_visit)
-
-    print(f"Found {len(to_visit)} pages to scrape. Starting extraction...")
+    print(f"Found {len(to_visit_urls)} pages to scrape. Starting extraction...")
 
     with open(VISITED_LOG_FILE, 'w', encoding="utf-8") as log_file, open(OUTPUT_DATA_FILE, 'w', encoding="utf-8") as output_file:
-        for current_url in to_visit:
+        for current_url in to_visit_urls:
             print(f"Scraping content form {current_url}")
 
             content = scrape_content(current_url)
@@ -101,7 +97,8 @@ def crawl_and_scrape(seed_url, max_pages: int = 10):
                 output_file.write(f"\n\n# URL: {current_url}\n\n{content}")
                 log_file.write(f"{current_url}\n")
             else:
-                log_file.write(f"{current_url} - No readable content extracted (Skipped)\n")
+                log_file.write(
+                    f"{current_url} - No readable content extracted (Skipped)\n")
                 print(f"  -> Skipping (No readable content extracted)")
 
             time.sleep(1)
@@ -111,7 +108,7 @@ def crawl_and_scrape(seed_url, max_pages: int = 10):
 
 def main():
     resources = fetch_cider_resources(
-        info_resource_id="jetstream2-gpu.indiana.access-ci.org"
+        info_resource_id="jetstream2.indiana.access-ci.org"
     )
 
     if not resources:
@@ -128,7 +125,8 @@ def main():
         response = requests.get(
             seed_url, headers={"User-Agent": "Mozzila/5.0"}, timeout=5)
         if response.status_code == 200:
-            crawl_and_scrape(seed_url, max_pages=20)
+            crawl_and_scrape(resource_info.get(
+                "info_resourceid"), seed_url, max_pages=50)
         else:
             print(
                 f"Warning: User Guide URL {seed_url} is broken or unreachable (HTTP {response.status_code})")
