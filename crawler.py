@@ -46,11 +46,12 @@ def get_all_document_links(seed_url, max_pages=50):
 
             soup = BeautifulSoup(res.text, "html.parser")
 
-            # Check for dublicate webpage through Canonical link
+            # Check for duplicate webpage through Canonical link
             canonical_tag = soup.find('link', rel="canonical")
-            true_url = canonical_tag['href']
-            if true_url in to_scrape_urls:
-                continue
+            if canonical_tag and canonical_tag.get('href'):
+                true_url = canonical_tag['href']
+                if true_url in to_scrape_urls:
+                    continue
 
             to_scrape_urls.add(current_url)
 
