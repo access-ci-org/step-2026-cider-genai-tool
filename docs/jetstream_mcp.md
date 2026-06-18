@@ -93,9 +93,9 @@ To add the MCP Server to your Open WebUI assistant:
 
 2. Click the `+` button on the right next to the MCP section to add a connection.
 
-3. In the setup dialog, click on the **Type** dropdown (which defaults to OpenAI) and change it to **MCP Streamable HTTP**.
+3. In the setup dialog, set the **Type** to **MCP Streamable HTTP** by clicking on the default value (OpenAI).
 
-4. Fill in the form with the following details (leave the API Key field blank, as this server does not require authentication):
+4. Fill in the form with the following details:
 
 ```txt
 Name: access-compute-resources (or any other name you want)
@@ -103,7 +103,9 @@ id: compute-resources
 URL: https://mcp.access-ci.org/compute-resources/mcp
 ```
 
-5. Click **Save**.
+5. Select **None** for **Auth**, as this server does not require authentication.
+
+6. Click **Save**.
 
 The MCP Server is now configured in your assistant. Next, you need to grant your model access to these tools:
 
