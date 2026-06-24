@@ -1,0 +1,10 @@
+{
+    "resource_id": "granite.ncsa.access-ci.org",
+    "organization_id": "844",
+    "crawler_settings": {
+        "seed_urls": ["https://docs.ncsa.illinois.edu/systems/taiga/"],
+        "exclude_patterns": ["/archive"],
+        "max_pages_per_seed": 50
+    },
+    "additional_documents": ["https://ncsa.illinois.edu/extra-document"]
+}

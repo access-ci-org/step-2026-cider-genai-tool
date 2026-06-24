@@ -15,7 +15,7 @@ def load_config(file_path: str):
         return config
 
 
-def crawl(seed_url: str, crawler_settings: dict = {}):
+def crawl(info_resource_id, seed_url: str, crawler_settings: dict = {}):
     """
     Crawl webpages and gather all the relevant links to scrape the content from.
     """
@@ -31,7 +31,20 @@ def crawl(seed_url: str, crawler_settings: dict = {}):
     exclude_patterns = crawler_settings.get("exclude_patterns", [])
     max_pages_per_seed = crawler_settings.get("max_pages_per_seed", 50)
 
-    queue = deque([seed_url, *config_seed_urls])
+    additional_urls = []
+    for url in config_seed_urls:
+        response = requests.get(
+            url, headers={"User-Agent": "Mozzila/5.0"}, timeout=5)
+
+        if response.status_code == 200:
+            additional_urls.append(response.url)
+        else:
+            print(
+                f"Warning: User Guide URL {url} is broken or unreachable (HTTP {response.status_code})")
+            log_error(
+                info_resource_id, f"User Guide URL {url} is broken or unreachable (HTTP {response.status_code}).")
+
+    queue = deque([seed_url, *additional_urls])
 
     crawled_urls = {}
 
@@ -83,7 +96,7 @@ def log_error(info_resource_id, error_message):
 
 def main():
     INFO_RESOURCE_ID = "granite.ncsa.access-ci.org"
-    CONFIG_PATH = None
+    CONFIG_PATH = "./config.json"
 
     if CONFIG_PATH:
         config = load_config(CONFIG_PATH)
@@ -117,8 +130,10 @@ def main():
         if response.status_code == 200:
             seed_url = response.url
             crawler_settings = config.get("crawler_settings", {})
-            to_visit_urls = crawl(seed_url, crawler_settings=crawler_settings)
-            to_visit_urls = set.union(*list(to_visit_urls.values()))
+            to_visit_urls = crawl(INFO_RESOURCE_ID, seed_url,
+                                  crawler_settings=crawler_settings)
+            to_visit_urls = [link for link_set in list(
+                to_visit_urls.values()) for link in link_set]
             scrape(INFO_RESOURCE_ID, to_visit_urls)
 
         else:
