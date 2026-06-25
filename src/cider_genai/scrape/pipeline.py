@@ -1,11 +1,15 @@
 import requests
 import json
 from collections import deque
-from typing import Optional
-from crawler import crawl_seed
-from fetch_cider import fetch_cider_resources
-from scraper import scrape_content
+from cider_genai.scrape.crawler import crawl_seed
+from cider_genai.scrape.fetch_cider import fetch_cider_resources
+from cider_genai.scrape.scraper import scrape_content
 import time
+
+
+INFO_RESOURCE_ID = "granite.ncsa.access-ci.org"
+CONFIG_PATH = "config.json"
+OUTPUT_DIR = "temp"
 
 
 def load_config(file_path: str):
@@ -61,8 +65,8 @@ def scrape(info_resource_id, to_visit_urls):
     Gather links given URL, and scrapes their content.
     """
 
-    VISITED_LOG_FILE = f"{info_resource_id.split('.')[0]}_visited_urls.txt"
-    OUTPUT_DATA_FILE = f"{info_resource_id.split('.')[0]}_scraped_content.md"
+    VISITED_LOG_FILE = f"{OUTPUT_DIR}/{info_resource_id.split('.')[0]}_visited_urls.txt"
+    OUTPUT_DATA_FILE = f"{OUTPUT_DIR}/{info_resource_id.split('.')[0]}_scraped_content.md"
 
     print(f"Found {len(to_visit_urls)} pages to scrape. Starting extraction...")
 
@@ -86,7 +90,7 @@ def scrape(info_resource_id, to_visit_urls):
 
 
 def log_error(info_resource_id, error_message):
-    ERROR_LOG_FILE = f"{info_resource_id.split('.')[0]}_error.txt"
+    ERROR_LOG_FILE = f"{OUTPUT_DIR}/{info_resource_id.split('.')[0]}_error.txt"
 
     with open(ERROR_LOG_FILE, 'w', encoding="utf-8") as error_file:
         error_file.write(f"{error_message}\n")
@@ -95,9 +99,6 @@ def log_error(info_resource_id, error_message):
 
 
 def main():
-    INFO_RESOURCE_ID = "granite.ncsa.access-ci.org"
-    CONFIG_PATH = "./config.json"
-
     if CONFIG_PATH:
         config = load_config(CONFIG_PATH)
     else:
@@ -115,7 +116,7 @@ def main():
         return
 
     # Save resource details
-    with open(f"{INFO_RESOURCE_ID.split('.')[0]}_cider_info.json", 'w') as fp:
+    with open(f"{OUTPUT_DIR}/{INFO_RESOURCE_ID.split('.')[0]}_cider_info.json", 'w') as fp:
         json.dump(resource_details, fp, indent=4)
 
     cider_type = resource_details.get("cider_type", "")
