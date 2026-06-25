@@ -4,16 +4,26 @@
 
 ## Project Setup
 
-Project Setup using uv.
-
-1. Create virtual environment & install dependencies.
+1. Create virtual environment.
 
 ```bash
-uv sync
+python -m venv .venv
 ```
 
-4. Run module.
+2. Activate the environment.
 
 ```bash
-uv run python -m cider_genai.scrape.pipeline
+source .venv/Scripts/activate
+```
+
+3. Install dependencies.
+
+```bash
+pip install -r requirements.txt
+```
+
+4. Run script as a module.
+
+```bash
+python -m cider_genai.scrape.pipeline
 ```
