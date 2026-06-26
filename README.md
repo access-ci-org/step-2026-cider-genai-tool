@@ -22,8 +22,8 @@ source .venv/Scripts/activate
 pip install -r requirements.txt
 ```
 
-4. Run script.
+4. Run script as a module.
 
 ```bash
-python fetch_cider.py
+python -m cider_genai.scrape.pipeline
 ```
